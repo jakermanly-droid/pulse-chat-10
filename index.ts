@@ -1,12 +1,12 @@
 import Fastify from 'fastify'
 import fastifyJwt from '@fastify/jwt'
 import fastifyCors from '@fastify/cors'
-import fastifySocketIO from '@fastify/socket.io'
+import fastifySocketIO from 'fastify-socket.io'
 import { PrismaClient } from '@prisma/client'
-import authRoutes from './modules/auth/auth.routes.js'
-import usersRoutes from './modules/users/users.routes.js'
-import messagesRoutes from './modules/messages/messages.routes.js'
-import { setupMessageSocket } from './modules/messages/messages.socket.js'
+import authRoutes from './auth.routes.js'
+import usersRoutes from './users.routes.js'
+import messagesRoutes from './messages.routes.js'
+import { setupMessageSocket } from './messages.socket.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
