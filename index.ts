@@ -16,7 +16,11 @@ export const prisma = new PrismaClient()
 
 const PORT = parseInt(process.env.PORT || '4000', 10)
 const HOST = '0.0.0.0'
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+
+// Safely sanitize CLIENT_ORIGIN to strip hidden spaces, newlines, or uppercase letters
+const rawOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
+const CLIENT_ORIGIN = rawOrigin.trim().replace(/[\r\n]/g, '').toLowerCase()
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 // Register CORS
