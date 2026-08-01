@@ -1,4 +1,4 @@
-import { prisma } from '../../index.js'
+import { prisma } from './index.js'
 
 export async function searchUsers(query: string) {
   const users = await prisma.user.findMany({
