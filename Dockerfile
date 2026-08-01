@@ -5,9 +5,11 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY prisma ./prisma
-COPY src ./src
 
 RUN npm ci
+
+COPY src ./src
+
 RUN npm run build
 
 EXPOSE 4000
