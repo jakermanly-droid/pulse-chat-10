@@ -14,7 +14,7 @@ RUN npm install
 COPY schema.prisma ./
 RUN npx prisma generate
 
-# Copy TypeScript configuration and source files
+# Copy tsconfig and all TypeScript source files
 COPY tsconfig.json ./
 COPY *.ts ./
 RUN npm run build
@@ -43,5 +43,5 @@ COPY schema.prisma ./
 
 EXPOSE 4000
 
-# Apply database migrations/push schema and start server
+# Apply database schema and start server
 CMD ["sh", "-c", "npx prisma db push && node dist/index.js"]
