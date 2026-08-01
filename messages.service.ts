@@ -1,21 +1,15 @@
-import { prisma } from '../../index.js'
+import { prisma } from './index.js'
 
-export async function getConversation(userId: string, otherUserId: string) {
+export async function getConversation(user1Id: string, user2Id: string) {
   const messages = await prisma.message.findMany({
     where: {
       OR: [
-        { senderId: userId, recipientId: otherUserId },
-        { senderId: otherUserId, recipientId: userId },
+        { senderId: user1Id, recipientId: user2Id },
+        { senderId: user2Id, recipientId: user1Id },
       ],
     },
-    orderBy: { createdAt: 'asc' },
-    select: {
-      id: true,
-      content: true,
-      senderId: true,
-      recipientId: true,
-      read: true,
-      createdAt: true,
+    orderBy: {
+      createdAt: 'asc',
     },
   })
 
@@ -23,23 +17,11 @@ export async function getConversation(userId: string, otherUserId: string) {
 }
 
 export async function sendMessage(senderId: string, recipientId: string, content: string) {
-  if (!content.trim()) {
-    throw new Error('Message content cannot be empty')
-  }
-
   const message = await prisma.message.create({
     data: {
-      content,
       senderId,
       recipientId,
-    },
-    select: {
-      id: true,
-      content: true,
-      senderId: true,
-      recipientId: true,
-      read: true,
-      createdAt: true,
+      content,
     },
   })
 
@@ -50,14 +32,6 @@ export async function markAsRead(messageId: string) {
   const message = await prisma.message.update({
     where: { id: messageId },
     data: { read: true },
-    select: {
-      id: true,
-      content: true,
-      senderId: true,
-      recipientId: true,
-      read: true,
-      createdAt: true,
-    },
   })
 
   return message
