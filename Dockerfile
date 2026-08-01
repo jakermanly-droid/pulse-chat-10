@@ -8,7 +8,7 @@ RUN apt-get update -y && apt-get install -y openssl
 
 # Copy package files and install all dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Copy Prisma schema directly from root and generate client
 COPY schema.prisma ./
@@ -33,7 +33,7 @@ ENV PORT=4000
 
 # Copy package files and install ONLY production dependencies
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy generated Prisma Client and compiled JavaScript code
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
