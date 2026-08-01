@@ -1,6 +1,6 @@
-import { prisma } from '../../index.js'
-import { hashPassword, comparePassword } from '../../utils/password.js'
-import { generateToken } from '../../utils/token.js'
+import { prisma } from './index.js'
+import { hashPassword, comparePassword } from './password.js'
+import { generateToken } from './token.js'
 
 export async function signupUser(
   email: string,
