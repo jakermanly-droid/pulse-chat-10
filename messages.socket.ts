@@ -1,8 +1,15 @@
 import { FastifyInstance } from 'fastify'
-import { prisma } from '../../index.js'
+import { prisma } from './index.js'
 
 export async function setupMessageSocket(app: FastifyInstance) {
-  app.io.on('connection', (socket) => {
+  const io = (app as any).io
+
+  if (!io) {
+    console.error('Socket.IO is not initialized on Fastify instance')
+    return
+  }
+
+  io.on('connection', (socket: any) => {
     console.log(`User connected: ${socket.id}`)
 
     // Join user to their own room
@@ -14,7 +21,7 @@ export async function setupMessageSocket(app: FastifyInstance) {
     // Handle new messages
     socket.on('message:send', async (data: { recipientId: string; content: string }) => {
       try {
-        const userId = (socket.handshake.auth as any).userId
+        const userId = (socket.handshake.auth as any)?.userId
         if (!userId) return
 
         // Save message to database
@@ -35,8 +42,8 @@ export async function setupMessageSocket(app: FastifyInstance) {
         })
 
         // Emit to both sender and recipient
-        app.io.to(`user:${userId}`).emit('message:new', message)
-        app.io.to(`user:${data.recipientId}`).emit('message:new', message)
+        io.to(`user:${userId}`).emit('message:new', message)
+        io.to(`user:${data.recipientId}`).emit('message:new', message)
       } catch (error) {
         console.error('Error sending message:', error)
       }
@@ -45,12 +52,12 @@ export async function setupMessageSocket(app: FastifyInstance) {
     // Handle message read
     socket.on('message:read', async (messageId: string) => {
       try {
-        const message = await prisma.message.update({
+        await prisma.message.update({
           where: { id: messageId },
           data: { read: true },
         })
 
-        app.io.emit('message:read', { messageId, read: true })
+        io.emit('message:read', { messageId, read: true })
       } catch (error) {
         console.error('Error marking message as read:', error)
       }
