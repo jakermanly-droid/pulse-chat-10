@@ -14,9 +14,8 @@ RUN npm install
 COPY schema.prisma ./
 RUN npx prisma generate
 
-# Copy tsconfig and all TypeScript source files
-COPY tsconfig.json ./
-COPY *.ts ./
+# Copy ALL project files (including subfolders)
+COPY . .
 RUN npm run build
 
 
