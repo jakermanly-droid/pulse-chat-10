@@ -1,49 +1,39 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import { getConversation, sendMessage, markAsRead } from './messages.service.js'
 
 export default async function messagesRoutes(app: FastifyInstance) {
-  // Get conversation endpoint
-  app.get<{ Params: { userId: string } }>(
-    '/conversation/:userId',
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        await request.jwtVerify()
-        const { userId } = request.params
-        const messages = await getConversation(request.user.id, userId)
-        return reply.send(messages)
-      } catch (error: any) {
-        return reply.code(400).send({ message: error.message })
-      }
+  // Get conversation with another user
+  app.get('/conversation', { onRequest: [async (req) => { await req.jwtVerify() }] }, async (request, reply) => {
+    try {
+      const { userId } = request.query as any
+      const currentUser = request.user as any
+      const messages = await getConversation(currentUser.id, userId)
+      return reply.status(200).send(messages)
+    } catch (error: any) {
+      return reply.status(400).send({ error: error.message })
     }
-  )
+  })
 
-  // Send message endpoint
-  app.post<{ Body: { recipientId: string; content: string } }>(
-    '/send',
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        await request.jwtVerify()
-        const { recipientId, content } = request.body
-        const message = await sendMessage(request.user.id, recipientId, content)
-        return reply.code(201).send(message)
-      } catch (error: any) {
-        return reply.code(400).send({ message: error.message })
-      }
+  // Send message
+  app.post('/send', { onRequest: [async (req) => { await req.jwtVerify() }] }, async (request, reply) => {
+    try {
+      const { recipientId, content } = request.body as any
+      const currentUser = request.user as any
+      const message = await sendMessage(currentUser.id, recipientId, content)
+      return reply.status(201).send(message)
+    } catch (error: any) {
+      return reply.status(400).send({ error: error.message })
     }
-  )
+  })
 
-  // Mark as read endpoint
-  app.post<{ Params: { messageId: string } }>(
-    '/:messageId/read',
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        await request.jwtVerify()
-        const { messageId } = request.params
-        const message = await markAsRead(messageId)
-        return reply.send(message)
-      } catch (error: any) {
-        return reply.code(400).send({ message: error.message })
-      }
+  // Mark message as read
+  app.patch('/read/:messageId', { onRequest: [async (req) => { await req.jwtVerify() }] }, async (request, reply) => {
+    try {
+      const { messageId } = request.params as any
+      const result = await markAsRead(messageId)
+      return reply.status(200).send(result)
+    } catch (error: any) {
+      return reply.status(400).send({ error: error.message })
     }
-  )
+  })
 }
